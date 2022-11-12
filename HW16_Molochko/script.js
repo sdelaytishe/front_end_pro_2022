@@ -1,4 +1,4 @@
-const API_URL = 'https://5dd3d5ba8b5e080014dc4bfa.mockapi.io/users/';
+
 const DELETE_BTN_CLASS = 'delete-btn';
 const EDIT_BTN_CLASS = 'edit-btn';
 const INVALID_INPUT_CLASS = 'invalid-input';
@@ -12,11 +12,9 @@ const surnameInput = document.querySelector('#surname');
 const emailInput = document.querySelector('#email');
 const contactTemplate = document.querySelector('#contactTemplate').innerHTML;
 
-let contactsList = [
-    { id: 1, name: 'Alex', surname: 'Smith', phone: '21314315' },
-    { id: 2, name: 'Bob', surname: 'Johns', phone: '2524523452345' },
-    { id: 3, name: 'John', surname: 'Snow', phone: '58568686' },
-];
+let contactsList = [];
+
+const contactsApi = new RestAPI('https://5dd3d5ba8b5e080014dc4bfa.mockapi.io/users/');
 
 contactForm.addEventListener('submit', onFormSubmit);
 contactsListEl.addEventListener('click', onContactsListElClick);
@@ -54,12 +52,10 @@ function onFormElementInput(e) {
     validateInput(e.target);
 }
 function fetchContacts(){
-    fetch(API_URL)
-        .then((res) => res.json())
-        .then((data) => {
-            contactsList = data;
-            renderList(contactsList);
-        });
+    contactsApi.getList().then(data => {
+        contactsList = data;
+        renderList(contactsList);
+    });
 }
 function renderList(list) {
     contactsListEl.innerHTML = list.map(generateContactHtml).join('');
@@ -105,29 +101,14 @@ function saveContact(contact) {
 }
 
 function addContact(contact) {
-    fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify(contact),
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    }).then((resp) => resp.json()).then((data) =>{
+   contactsApi.create(contact).then((resp) => resp.json()).then((data) =>{
         contactsList = [...contactsList, data];
         renderList(contactsList);
     });
 }
 
 function updateContact(contact) {
-    // const index = contactsList.findIndex((item) => item.id === contact.id);
-    // contactsList.splice(index, 1, contact);
-    fetch(API_URL + contact.id, {
-        method: 'PUT',
-        body: JSON.stringify(contact),
-        headers: {
-            'Content-Type': 'application/json',
-        },
-
-    }).then(() => {
+  contactsApi.update(contact).then(() => {
         contactsList = contactsList.map((item) =>
             item.id === contact.id ? contact : item
         );
@@ -138,11 +119,7 @@ function updateContact(contact) {
 }
 
 function deleteContact(id) {
-    // const index = contactsList.findIndex((item) => item.id === id);
-    // contactsList.splice(index, 1);
-    fetch(API_URL + id, {
-        method: 'DELETE',
-    }).then(() => {
+   contactsApi.delete(id).then(() => {
         contactsList = contactsList.filter((item) => item.id !== id);
         renderList(contactsList);
     });
