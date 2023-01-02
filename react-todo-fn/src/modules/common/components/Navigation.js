@@ -22,6 +22,12 @@ function Navigation({currentPath, navigate}) {
                 currentPath={currentPath}
                 navigate={navigate}
             />
+            < NavigationLink
+                path={'gallery'}
+                label='Gallery'
+                currentPath={currentPath}
+                navigate={navigate}
+            />
         </div>
     );
 }
